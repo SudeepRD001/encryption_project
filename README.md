@@ -10,6 +10,30 @@
 
 
 ---
+## 🐳 Setup Using Docker
+You can also run this project using Docker:
+
+### 🔹 1. Pull and run this image on any machine using
+```bash
+docker pull sudeeprd001/encryption_project-web
+```
+
+### 🔹 2. Run the Docker Container
+```bash
+docker run -d -p 8000:8000 sudeeprd001/encryption_project-web
+```
+
+### 🔹 3. Stop and Remove the Container
+```bash
+docker ps  # Get the container ID
+docker stop <container_id>
+docker rm <container_id>
+```
+For Docker setup, visit:
+
+```arduino
+http://localhost:8000
+```
 
 ## 🚀 **Installation & Setup**  
 Follow these steps to set up and run the project locally:  
@@ -36,32 +60,6 @@ GOOGLE_CLIENT_ID=Your_GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET=Your_GOOGLE_CLIENT_SECRET
 ```
 
-### 🔹 **4. Run the Application**
-```bash
-python manage.py runserver  # For Django projects
-python app.py  # For Python projects
-npm start  # For React/Node.js projects
-```
-## 🐳 Setup Using Docker
-You can also run this project using Docker:
-
-### 🔹 1. Pull and run this image on any machine using
-```bash
-docker pull sudeeprd001/encryption_project-web
-```
-
-### 🔹 2. Run the Docker Container
-```bash
-docker run -d -p 8000:8000 sudeeprd001/encryption_project-web
-```
-
-### 🔹 3. Stop and Remove the Container
-```bash
-docker ps  # Get the container ID
-docker stop <container_id>
-docker rm <container_id>
-```
-
 ## 🔥 Run the Application
 For local setup, use the following command:
 
@@ -71,8 +69,4 @@ python app.py  # For Python projects
 npm start  # For React/Node.js projects
 ```
 
-For Docker setup, visit:
 
-```arduino
-http://localhost:8000
-```
