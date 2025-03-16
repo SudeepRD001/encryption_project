@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-success text-white text-center">
+                    <h4>🔐 Encryption Result</h4>
+                </div>
+                <div class="card-body">
+                    {% if encrypted_text %}
+                        <div class="alert alert-info">
+                            <strong>Encrypted Text:</strong>
+                            <p class="text-wrap">{{ encrypted_text }}</p>
+                        </div>
+                    {% elif decrypted_text %}
+                        <div class="alert alert-success">
+                            <strong>Decrypted Text:</strong>
+                            <div class="d-flex align-items-center">
+                                <textarea id="decryptedMessage" class="form-control text-wrap" readonly>{{ decrypted_text }}</textarea>
+                                <button class="btn btn-outline-primary ms-3" onclick="copyToClipboard('decryptedMessage')">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">No text available.</div>
+                    {% endif %}
+                    <div class="text-center mt-3">
+                        <a href="{% url 'encrypt' %}" class="btn btn-primary">
+                            <i class="bi bi-lock"></i> Encrypt Again
+                        </a>
+                        <a href="{% url 'decrypt' %}" class="btn btn-danger">
+                            <i class="bi bi-unlock"></i> Decrypt Again
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Bootstrap Toast for Copy Notification -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
+    <div id="copyToast" class="toast align-items-center text-bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body">
+                Copied to clipboard!
+            </div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ JavaScript for Copying & Toast Notification -->
+<script>
+    function copyToClipboard(elementId) {
+        const textArea = document.getElementById(elementId);
+
+        if (!textArea || textArea.value.trim() === "") {
+            showToast("Nothing to copy!", "danger");
+            return;
+        }
+
+        navigator.clipboard.writeText(textArea.value).then(() => {
+            showToast("Copied to clipboard!", "success");
+        }).catch(err => {
+            console.error("Clipboard copy failed:", err);
+            showToast("Copy failed. Try manually!", "danger");
+        });
+    }
+
+    function showToast(message, type) {
+        const toastEl = document.getElementById("copyToast");
+        const toastBody = toastEl.querySelector(".toast-body");
+
+        toastBody.textContent = message;
+        toastEl.className = `toast align-items-center text-bg-${type} border-0 show`;
+
+        setTimeout(() => {
+            toastEl.classList.remove("show");
+        }, 2000);
+    }
+</script>
+{% endblock %}

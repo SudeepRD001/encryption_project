@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Encryption App</title>
+
+    <!-- ✅ Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- ✅ Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <!-- ✅ Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <style>
+        /* 🔹 Smooth Page Transitions */
+        body {
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+
+        /* 🔹 Navbar Styling */
+        .navbar {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        .navbar-nav .nav-link {
+            color: white;
+            transition: color 0.3s ease-in-out;
+        }
+        .navbar-nav .nav-link:hover {
+            color: #ffc107;
+        }
+
+        /* 🔹 Modern Form Styling */
+        .form-floating .form-control {
+            border-radius: 10px;
+        }
+        .form-floating label {
+            color: #6c757d;
+        }
+        .input-group-text {
+            background: #f8f9fa;
+            border-right: 0;
+        }
+        .form-control {
+            border-left: 0;
+        }
+
+        /* 🔹 Dark & Light Mode */
+        .light-mode {
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+        .dark-mode {
+            background-color: #212529;
+            color: white;
+        }
+
+        /* 🔹 Enhanced Buttons */
+        .btn-theme {
+            border-radius: 20px;
+            transition: all 0.3s ease-in-out;
+        }
+        .btn-theme:hover {
+            transform: scale(1.05);
+        }
+
+        /* 🔹 Footer Styling */
+        footer {
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="light-mode" onload="document.body.style.opacity='1'">
+
+<!-- ✅ Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#">🔐 Encryption App</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'encrypt' %}"><i class="bi bi-lock"></i> Encrypt</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'decrypt' %}"><i class="bi bi-unlock"></i> Decrypt</a>
+                    </li>
+                    <li class="nav-item">
+                        <form id="logout-form" action="{% url 'authentication:logout' %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm btn-theme">
+                                <i class="bi bi-box-arrow-right"></i> Logout
+                            </button>
+                        </form>
+                    </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="btn btn-primary btn-sm btn-theme" href="{% url 'authentication:login' %}">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </a>
+                </li>
+                
+                {% endif %}
+                <li class="nav-item">
+                    <button id="theme-toggle" class="btn btn-sm btn-outline-light ms-3">
+                        <i class="bi bi-moon"></i> Dark Mode
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- ✅ Main Content -->
+<div class="container mt-5 pt-4">
+    {% block content %}{% endblock %}
+</div>
+
+<!-- ✅ Footer -->
+<footer class="text-white text-center py-3 mt-4">
+    <p class="mb-0">© 2025 Encryption App | Secure Your Messages</p>
+</footer>
+
+<!-- ✅ Bootstrap Toast for Copy Feedback -->
+<div id="copyToast" class="toast position-fixed top-0 end-0 m-3 p-2 bg-success text-white" role="alert">
+    <div class="toast-body">Copied to clipboard!</div>
+</div>
+
+<!-- ✅ Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- ✅ Dark Mode & Copy-to-Clipboard Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // 🔹 Dark Mode Toggle with Persistence
+        const themeToggle = document.getElementById("theme-toggle");
+        const body = document.body;
+
+        if (localStorage.getItem("theme") === "dark") {
+            body.classList.remove("light-mode");
+            body.classList.add("dark-mode");
+            themeToggle.innerHTML = '<i class="bi bi-brightness-high"></i> Light Mode';
+        }
+
+        themeToggle.addEventListener("click", function () {
+            body.classList.toggle("dark-mode");
+            body.classList.toggle("light-mode");
+
+            if (body.classList.contains("dark-mode")) {
+                localStorage.setItem("theme", "dark");
+                themeToggle.innerHTML = '<i class="bi bi-brightness-high"></i> Light Mode';
+            } else {
+                localStorage.setItem("theme", "light");
+                themeToggle.innerHTML = '<i class="bi bi-moon"></i> Dark Mode';
+            }
+        });
+
+        // 🔹 Copy to Clipboard Function
+        window.copyToClipboard = function (elementId) {
+            const textArea = document.getElementById(elementId);
+
+            if (!textArea || textArea.value.trim() === "") {
+                showToast("Nothing to copy!", "danger");
+                return;
+            }
+
+            navigator.clipboard.writeText(textArea.value).then(() => {
+                showToast("Copied to clipboard!", "success");
+            }).catch(err => {
+                console.error("Clipboard copy failed:", err);
+                showToast("Copy failed. Try manually!", "danger");
+            });
+        };
+
+        // 🔹 Show Bootstrap Toast Message
+        function showToast(message, type) {
+            const toastEl = document.getElementById("copyToast");
+            const toastBody = toastEl.querySelector(".toast-body");
+
+            toastBody.textContent = message;
+            toastEl.className = `toast align-items-center text-bg-${type} border-0 show`;
+
+            setTimeout(() => {
+                toastEl.classList.remove("show");
+            }, 2000); // Hide after 2 seconds
+        }
+    });
+</script>
+
+</body>
+</html>

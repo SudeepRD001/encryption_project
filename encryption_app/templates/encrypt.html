@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    /* Cybersecurity Background Animation */
+    body {
+        background: #0a0a0a;
+        color: white;
+        font-family: 'Poppins', sans-serif;
+        overflow-x: hidden;
+        transition: background 0.3s ease-in-out, color 0.3s ease-in-out;
+    }
+    /* .cyber-bg {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+        background: url('/encryption_project/encryption_app/static/images/encryption.gif') center/cover no-repeat;
+        opacity: 0.15;
+    } */
+
+    /* Dark Mode */
+    .dark-mode {
+        background: #121212;
+        color: white;
+    }
+    .toggle-dark-mode {
+        position: fixed;
+        top: 10px;
+        right: 20px;
+        background: white;
+        border: none;
+        padding: 10px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+    }
+    .toggle-dark-mode:hover {
+        background: #f1f1f1;
+    }
+
+    /* UI Enhancements */
+    .card {
+        border-radius: 15px;
+    }
+    .btn {
+        transition: all 0.3s ease-in-out;
+    }
+    .btn:hover {
+        transform: scale(1.05);
+    }
+    .modal-content {
+        border-radius: 15px;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .toggle-dark-mode {
+            top: 5px;
+            right: 10px;
+            padding: 8px;
+        }
+    }
+</style>
+
+<!-- Dark Mode Toggle -->
+<button class="toggle-dark-mode" onclick="toggleDarkMode()">🌙</button>
+
+<!-- Cyber Background -->
+<!-- <div class="cyber-bg"></div> -->
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4>🔐 Encrypt a Message</h4>
+                </div>
+                <div class="card-body">
+                    <form id="encryptForm" method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="plaintext" class="form-label">Enter text to encrypt:</label>
+                            <textarea class="form-control" id="plaintext" name="plaintext" rows="3" placeholder="Enter your message..." required></textarea>
+                            <small id="charCount" class="text-muted">0 / 500</small>
+                        </div>
+                        <button type="submit" id="encryptBtn" class="btn btn-primary w-100">
+                            <i class="bi bi-lock"></i> Encrypt
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Encryption Result Modal -->
+<div class="modal fade" id="encryptModal" tabindex="-1" aria-labelledby="encryptModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="encryptModalLabel">🔒 Encryption Result</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <textarea id="encryptedMessage" class="form-control" readonly></textarea>
+                <div class="mt-3 text-center">
+                    <button class="btn btn-outline-primary" onclick="copyToClipboard('encryptedMessage')">
+                        <i class="bi bi-clipboard"></i> Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Dark Mode Toggle
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+    }
+
+    // Character Counter
+    document.getElementById("plaintext").addEventListener("input", function () {
+        document.getElementById("charCount").textContent = `${this.value.length} / 500`;
+    });
+
+    // Encryption Form Submission
+    document.getElementById("encryptForm").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const encryptBtn = document.getElementById("encryptBtn");
+        const plaintext = document.getElementById("plaintext").value.trim();
+
+        if (!plaintext) {
+            showToast("Please enter a message before encrypting.", "warning");
+            return;
+        }
+
+        encryptBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Encrypting...';
+        encryptBtn.disabled = true;
+
+        const formData = new FormData(this);
+        fetch("{% url 'encrypt' %}", {
+            method: "POST",
+            headers: { "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            encryptBtn.innerHTML = '<i class="bi bi-lock"></i> Encrypt';
+            encryptBtn.disabled = false;
+
+            if (data.encrypted) {
+                document.getElementById("encryptedMessage").value = data.encrypted;
+                new bootstrap.Modal(document.getElementById("encryptModal")).show();
+            } else {
+                showToast("Encryption failed. Try again!", "danger");
+            }
+        })
+        .catch(error => {
+            encryptBtn.innerHTML = '<i class="bi bi-lock"></i> Encrypt';
+            encryptBtn.disabled = false;
+            showToast("An error occurred. Please try again!", "danger");
+        });
+    });
+
+    // Copy to Clipboard
+    function copyToClipboard(elementId) {
+        const textArea = document.getElementById(elementId);
+        if (textArea.value.trim() === "") {
+            showToast("Nothing to copy!", "danger");
+            return;
+        }
+
+        navigator.clipboard.writeText(textArea.value).then(() => {
+            showToast("Copied to clipboard!", "success");
+            let modal = bootstrap.Modal.getInstance(document.getElementById("encryptModal"));
+            if (modal) modal.hide();
+        });
+    }
+
+    // Show Toast Message
+    function showToast(message, type) {
+        alert(message);  // Basic fallback if no toast available
+    }
+</script>
+{% endblock %}

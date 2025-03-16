@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+{% load socialaccount %}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-header bg-success text-white text-center">
+                    <h4>🔑 Login</h4>
+                </div>
+                <div class="card-body">
+                    
+                    <!-- ✅ Flash Messages with Different Colors -->
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert 
+                                {% if message.tags == 'success' %}alert-success 
+                                {% elif message.tags == 'error' %}alert-danger 
+                                {% elif message.tags == 'warning' %}alert-warning 
+                                {% else %}alert-info{% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- ✅ Login Form -->
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" name="username" class="form-control" placeholder="Enter your username" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <div class="input-group">
+                                <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
+                                    👁
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">Login</button>
+                    </form>
+
+                    <!-- ✅ Google Login Button -->
+                    <div class="text-center mt-3">
+                        <a href="{% provider_login_url 'google' %}" class="btn btn-danger w-100">
+                            <i class="bi bi-google"></i> Login with Google
+                        </a>
+                    </div>
+
+                    <p class="mt-3 text-center">Don't have an account? 
+                        <a href="{% url 'authentication:register' %}" class="text-success fw-bold">Register</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ Password Visibility Toggle Script -->
+<script>
+    function togglePassword() {
+        var passwordField = document.getElementById("password");
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+        } else {
+            passwordField.type = "password";
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,29 @@
+/* Light Mode (Default) */
+.light-mode {
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+/* Dark Mode */
+.dark-mode {
+    background-color: #121212;
+    color: #f8f9fa;
+}
+
+.dark-mode .card {
+    background-color: #1e1e1e;
+    color: #f8f9fa;
+}
+
+.dark-mode .navbar {
+    background-color: #222;
+}
+
+.dark-mode footer {
+    background-color: #222;
+}
+
+/* Smooth Theme Transitions */
+body {
+    transition: background-color 0.3s, color 0.3s;
+}
